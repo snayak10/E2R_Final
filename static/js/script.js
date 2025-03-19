@@ -1,6 +1,16 @@
 let currentPage = 0;
 const pages = document.querySelectorAll('.page');
 
+function updatePage() {
+    pages.forEach((page, index) => {
+        page.style.display = index === currentPage ? "block" : "none";
+    });
+
+    
+    document.getElementById("prevButton").disabled = (currentPage === 0);
+    document.getElementById("nextButton").disabled = (currentPage === pages.length - 1);
+}
+
 function nextPage() {
     if (currentPage < pages.length - 1) {
         currentPage++;
@@ -12,11 +22,15 @@ function nextPage() {
     }
 }
 
-function updatePage() {
-    pages.forEach((page, index) => {
-        page.style.display = index === currentPage ? "block" : "none";
-    });
+function prevPage() {
+    if (currentPage > 0) {
+        currentPage--;
+        updatePage();
+    }
 }
+
+document.addEventListener("DOMContentLoaded", updatePage);
+document.addEventListener("DOMContentLoaded", updateEmailLink);
 
 function updateEmailLink() {
     fetch("/send_email")
@@ -26,9 +40,6 @@ function updateEmailLink() {
         })
         .catch(error => console.error("Error fetching email link:", error));
 }
-
-
-document.addEventListener("DOMContentLoaded", updateEmailLink);
 
 function copyToClipboard() {
     const textField = document.querySelector(".copy-text");
@@ -94,7 +105,6 @@ function submitForm() {
             currentPage = 1;
             updatePage();
 
-            
             updateEmailLink();
         }, 500);
     })
@@ -112,34 +122,48 @@ document.getElementById("runForm").addEventListener("submit", function(event) {
 });
 
 function fetchTesters() {
-    fetch("/get_agents")
-    .then(response => response.json())
-    .then(data => {
-        const testerDropdown = document.getElementById("actionChoice");
-        testerDropdown.innerHTML = "";
+    const testerList = document.getElementById("testerList");
+    testerList.innerHTML = "";
 
-        data.tester.forEach(tester => {
-            let option = document.createElement("option");
-            option.value = tester;
-            option.textContent = tester;
-            testerDropdown.appendChild(option);
-        });
-    })
-    .catch(error => console.error("Error fetching testers:", error));
+    const testers = ["HBI", "HDMT", "Shared"];
+    
+    testers.forEach(tester => {
+        const checkbox = document.createElement("input");
+        checkbox.type = "checkbox";
+        checkbox.name = "tester";
+        checkbox.value = tester;
+        checkbox.id = `tester_${tester}`;
+
+        const label = document.createElement("label");
+        label.setAttribute("for", `tester_${tester}`);
+        label.textContent = tester;
+
+        const div = document.createElement("div");
+        div.appendChild(checkbox);
+        div.appendChild(label);
+
+        testerList.appendChild(div);
+    });
 }
 
 function runFinalScript() {
-    const selectedTester = document.getElementById("actionChoice").value;
+    const selectedTesters = Array.from(document.querySelectorAll("#testerList input:checked"))
+        .map(input => input.value);
+
+    if (selectedTesters.length === 0) {
+        alert("Please select at least one tester.");
+        return;
+    }
 
     fetch("/run_final", {
         method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: `tester=${encodeURIComponent(selectedTester)}`
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ testers: selectedTesters })
     })
     .then(response => response.json())
     .then(data => {
+        alert("Build triggered successfully!");
         console.log("Final script output:", data.output);
-        alert("build triggered successfully!");
         currentPage = 3;
         updatePage();
     })
