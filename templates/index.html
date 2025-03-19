@@ -4,81 +4,104 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>E2R</title>
-    <link rel="stylesheet" href="{{ url_for('static', path='css/styles.css') }}">
+
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+    
+
+    <link rel="stylesheet" href="{{ url_for('static', path='css/styles.css') }}">
 </head>
 <body>
-    <div class="header">
-        <img src="{{ url_for('static', path='images/logo.png') }}" alt="Logo" class="logo-img">
-        <span class="team-name">TETD India</span>
-    </div>  
 
-    <div class="container">
+    
+    <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
+        <div class="container">
+            <a class="navbar-brand" href="#">
+                <img src="{{ url_for('static', path='images/logo.png') }}" alt="Logo" height="40">
+            </a>
+            <span class="team-name">TETD India</span>
+        </div>
+    </nav>
+    
+    
+    <div class="container mt-5">
         <div class="slider">
         
-            <div class="page" id="page1">
-                <div class="center-content">
-                    <h1>EverReadyToRelease</h1>
-                    <p>Test • Run • Build</p>
-                    <form id="runForm">
-                        <div class="input-area">
-                            <input type="text" id="branch_name" name="branch_name" placeholder="Enter Branch Name" class="input-field" required>
-                            <input type="text" id="number_of_commits" name="number_of_commits" placeholder="Enter Number of Commits" class="input-field" required>
+            <div class="page text-center" id="page1">
+                <h1 class="display-4">EverReadyToRelease</h1>
+                <p class="lead">Test • Run • Build</p>
+        
+                <form id="runForm">
+                    <div class="row justify-content-center">
+                        <div class="col-md-4">
+                            <input type="text" id="branch_name" name="branch_name" class="form-control" placeholder="Enter Branch Name" required>
                         </div>
-                        
-                            <div class="button-container">
-                                <button type="submit" id="runButton" class="btn">Run</button>
-                                <div id="progressBarContainer" class="progress-container">
-                                    <div id="progressBar" class="progress-bar"></div>
-                                </div>
-                            </div>
-
+                        <div class="col-md-4">
+                            <input type="text" id="number_of_commits" name="number_of_commits" class="form-control" placeholder="Enter Number of Commits" required>
                         </div>
-                    </form>
-                </div>
+                    </div>
+                    <div class="text-center">
+                        <button type="submit" id="runButton" class="btn btn-primary mt-3">Run</button>
+                        <div id="progressBarContainer" class="progress-container">
+                            <div id="progressBar" class="progress-bar"></div>
+                        </div>
+                    </div>
+                </form>
             </div>
 
             <div class="page" id="page2" style="display:none;">
-                <div class="center-content">
+                <div class="text-center">
                     <h1>Suggested Test and Recipe</h1>
-                    <textarea id="suggestedTest" class="input-field dynamic-textbox" readonly>{{ testcases | join('\n') if testcases else "No test cases found." }}</textarea>
-                    <textarea id="suggestedRecipe" class="input-field dynamic-textbox" readonly>{{ recipes | join('\n') if recipes else "No recipes found." }}</textarea>
-                    <button class="btn" onclick="nextPage()">Next</button>
+                    <textarea id="suggestedTest" class="form-control mt-3" rows="4" readonly>{{ testcases | join('\n') if testcases else "No test cases found." }}</textarea>
+                    <textarea id="suggestedRecipe" class="form-control mt-3" rows="4" readonly>{{ recipes | join('\n') if recipes else "No recipes found." }}</textarea>
+                    <button class="btn btn-primary mt-3" onclick="nextPage()">Next</button>
                 </div>
             </div>
             
             <div class="page" id="page3" style="display:none;">
-                <div class="center-content">
+                <div class="text-center">
                     <h1>Select the Tester</h1>
-                    <select id="actionChoice" class="input-field"></select>
-                    <button class="btn" onclick="runFinalScript()">Build</button>
+                    <div class="mt-3">
+                        <div id="testerList"></div>    
+                    </div>
+                    <button class="btn btn-primary mt-3" onclick="runFinalScript()">Run</button>
                 </div>
             </div>
 
             <div class="page" id="page4" style="display:none;">
-                <div class="center-content">
+                <div class="text-center">
                     <h1>Build Triggered</h1>
                     <p>Your build has been triggered successfully!</p>
-                    <div class="copy-container">
-                        <input type="text" class="copy-text" value="Link to TeamCity Build" readonly>
-                        <button class="copy-btn" onclick="copyToClipboard()">Copy</button>
+                    <div class="input-group mt-3">
+                        <input type="text" id="teamcity" class="form-control" value="Link to TeamCity Build" readonly>
+                        <button class="btn btn-outline-primary" onclick="copyToClipboard()">Copy</button>
                     </div>
-                    <div>
+                    <div class="mt-3">
                         <a href="#" id="configureLink" class="link">
-                            <img src="{{ url_for('static', path='images/setting.png') }}" alt="Settings Icon" class="settings-icon">
+                            <img src="{{ url_for('static', path='images/setting.png') }}" alt="Settings Icon" class="settings-icon me-2">
                             Configure who gets an email
                         </a>  
                     </div>
                 </div>
             </div>
+
         </div>
     </div>
-
-    <footer class="footer">
+    <div class="pagination">
+        <button id="prevButton" onclick="prevPage()">&lt;</button>
+        <button id="nextButton" onclick="nextPage()">&gt;</button>
+    </div>
+    
+    <footer class="footer text-center py-3">
         Developed and Maintained by TETD India Team
-    </footer>  
+    </footer>
 
-    <script src="{{ url_for('static', path='js/script.js') }}"></script>  
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{{ url_for('static', path='js/script.js') }}"></script>
+    
 </body>
 </html>
-
